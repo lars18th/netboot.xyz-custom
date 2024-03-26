@@ -5,7 +5,18 @@
 
 :start
 echo Hello world!
-sleep 10
+set os System Rescue
+set os_arch ${arch}
+iseq ${os_arch} x86_64 && set os_arch amd64 ||
+iseq ${os_arch} i386 && set os_arch i686 ||
+menu ${os}
+set ipparam BOOTIF=${netX/mac} ip=dhcp net.ifnames=0
+item --gap ${os} Versions
+{% for key, value in endpoints.items() | sort %}
+{% if value.os == "systemrescue" %}
+iseq ${os_arch} {{ value.arch }} && item {{ value.version }}_${os_arch} ${space} ${os} {{ value.version }} ||
+{% endif %}
+{% endfor %}
 goto custom_exit
 
 :custom_exit
