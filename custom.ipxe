@@ -1,42 +1,37 @@
 #!ipxe
 ###
-### netboot.xyz-custom menu
+### netboot.xyz-custom menu example
 ###
 
-goto ${menu} ||
+:custom
+clear custom_choice
+menu This is a Test Menu
+item --gap This is the first sub menu
+item option_one ${space} Loading a kernel and initrd
+item option_two ${space} Loading an ISO
+item --gap This is a second sub menu
+item option_three ${space} Loads another custom sub menu
+item option_four ${space} This is option four
+choose custom_choice || goto custom_exit
+echo ${cls}
+goto ${custom_choice}
+goto custom_exit
 
-:live_menu
-set os System Rescue
-set os_arch ${arch}
-iseq ${os_arch} x86_64 && set os_arch amd64 ||
-iseq ${os_arch} i386 && set os_arch i686 ||
-menu ${os}
-set ipparam BOOTIF=${netX/mac} ip=dhcp net.ifnames=0
-item --gap ${os} Versions
-{% for key, value in endpoints.items() | sort %}
-{% if value.os == "systemrescue" %}
-iseq ${os_arch} {{ value.arch }} && item {{ value.version }}_${os_arch} ${space} ${os} {{ value.version }}  [rootpass=test] ||
-{% endif %}
-{% endfor %}
-choose live_version || goto custom_exit
-goto ${live_version}
+:option_one
+kernel http://path.to/vmlinuz
+initrd http://path.to/initrd
+imgargs vmlinuz put_kernel_img_args_here
+boot || goto custom_exit
 
-{% for key, value in endpoints.items() | sort %}
-{% if value.os == "systemrescue" %}
-:{{ value.version }}_{{ value.arch }}
-set url ${live_endpoint}{{ value.path }}
-goto boot
+:option_two
+kernel https://boot.netboot.xyz/memdisk raw iso
+initrd http://path.to/iso
+boot || goto custom_exit
 
-{% endif %}
-{% endfor %}
-
-:boot
-imgfree
-kernel ${url}vmlinuz archisobasedir=sysresccd ${ipparam} archiso_http_srv=${url} rootpass=test nofirewall {{ kernel_params }}
-initrd ${url}initrd
-boot
+:option_three
+echo Chains into another menu...
+chain https://raw.githubusercontent.com/${github_user}/netboot.xyz-custom/master/custom1.ipxe || goto custom
 
 :custom_exit
 chain utils.ipxe
 exit
-
