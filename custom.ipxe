@@ -3,11 +3,7 @@
 ### netboot.xyz-custom menu
 ###
 
-#!ipxe
-
-goto ${menu} ||
-
-:live_menu
+:custom
 set os System Rescue
 set os_arch ${arch}
 iseq ${os_arch} x86_64 && set os_arch amd64 ||
@@ -20,7 +16,7 @@ item --gap ${os} Versions
 iseq ${os_arch} {{ value.arch }} && item {{ value.version }}_${os_arch} ${space} ${os} {{ value.version }}  [rootpass=${mac:hexraw}] ||
 {% endif %}
 {% endfor %}
-choose live_version || goto live_exit
+choose live_version || goto custom_exit
 goto ${live_version}
 
 {% for key, value in endpoints.items() | sort %}
@@ -38,7 +34,7 @@ kernel ${url}vmlinuz archisobasedir=sysresccd ${ipparam} archiso_http_srv=${url}
 initrd ${url}initrd
 boot
 
-:live_exit
-clear menu
-exit 0
+:custom_exit
+chain utils.ipxe
+exit
 
