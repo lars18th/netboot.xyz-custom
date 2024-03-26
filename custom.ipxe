@@ -13,7 +13,7 @@ set ipparam BOOTIF=${netX/mac} ip=dhcp net.ifnames=0
 item --gap ${os} Versions
 {% for key, value in endpoints.items() | sort %}
 {% if value.os == "systemrescue" %}
-iseq ${os_arch} {{ value.arch }} && item {{ value.version }}_${os_arch} ${space} ${os} {{ value.version }}  [rootpass=${mac:hexraw}] ||
+iseq ${os_arch} {{ value.arch }} && item {{ value.version }}_${os_arch} ${space} ${os} {{ value.version }}  [rootpass=test] ||
 {% endif %}
 {% endfor %}
 choose live_version || goto custom_exit
@@ -30,7 +30,7 @@ goto boot
 
 :boot
 imgfree
-kernel ${url}vmlinuz archisobasedir=sysresccd ${ipparam} archiso_http_srv=${url} rootpass=${mac:hexraw} nofirewall {{ kernel_params }}
+kernel ${url}vmlinuz archisobasedir=sysresccd ${ipparam} archiso_http_srv=${url} rootpass=test nofirewall {{ kernel_params }}
 initrd ${url}initrd
 boot
 
